@@ -8,4 +8,4 @@ systemd-notify-fifo-server \
 
 echo "$!"
 
-cat "$ready_fifo"
+timeout 1 cat "$ready_fifo"
