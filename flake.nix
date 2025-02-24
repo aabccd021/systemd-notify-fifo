@@ -36,7 +36,14 @@
         text = builtins.readFile ./systemd_notify_fifo.sh;
       };
 
-      packages = {
+      testAttrs = import ./tests {
+        pkgs = pkgs;
+        systemd-notify-fifo = systemd-notify-fifo;
+      };
+
+      tests = pkgs.lib.mapAttrs' (name: value: { name = "test-" + name; value = value; }) testAttrs;
+
+      packages = tests // {
         systemd-notify-fifo-server = systemd-notify-fifo-server;
         systemd-notify-fifo = systemd-notify-fifo;
         formatting = treefmtEval.config.build.check self;
