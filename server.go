@@ -24,8 +24,8 @@ func main() {
 	outPath := flag.String("out", "", "Path to the pipe file")
 	flag.Parse()
 
-	if *readyPath == "" || *outPath == "" {
-		log.Fatal("Both -ready and -pipe flags are required")
+	if *outPath == "" {
+		log.Fatal("Usage: server -out /path/to/pipe")
 	}
 
 	notifySocket := os.Getenv("NOTIFY_SOCKET")
@@ -47,8 +47,10 @@ func main() {
 	}
 	defer conn.Close()
 
-	if err := write(*readyPath, []byte{}); err != nil {
-		log.Fatalf("Ready path is not writable: %v", err)
+	if *readyPath != "" {
+		if err := write(*readyPath, []byte{}); err != nil {
+			log.Fatalf("Ready path is not writable: %v", err)
+		}
 	}
 
 	buf := make([]byte, 65536)
