@@ -104,6 +104,6 @@ mkfifo "$ready_fifo"
 systemd-notify-fifo-server -ready "$ready_fifo" -out ./notify.pipe &
 notify_pid=$!
 
-# This might result in flaky behavior, e.g. `systemd-notify` executed before NOTIFY_SOCKET is ready.
+# This might result in flaky behavior, e.g. `systemd-notify --ready` executed before NOTIFY_SOCKET is ready.
 run_web_server &
 ```
