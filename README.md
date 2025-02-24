@@ -4,6 +4,11 @@ Pipe systemd-notify messages to Unix FIFO.
 
 You can use this to mock systemd-notify, log notified messages, or wait for a server to be ready.
 
+This repo includes two commands:
+
+- `systemd-notify-fifo`: Pipe systemd-notify messages to Unix FIFO.
+- `systemd-notify-fifo-server`: Same as `systemd-notify-fifo`, but we need to manually wait for the NOTIFY_SOCKET to be ready.
+
 ## Usage
 
 ### Wait for server to be ready
@@ -27,7 +32,8 @@ done
 
 echo "run_web_server is ready"
 
-sleep 10
+# example command that has to run only after the web server is ready
+run_tests
 
 kill "$web_server_pid"
 
@@ -45,11 +51,13 @@ notify_pid=$(systemd-notify-fifo ./notify.pipe)
 run_web_server &
 web_server_pid=$!
 
+# read messages from the FIFO and log them
 while true; do
  message=$(cat ./notify.pipe)
  echo "message received on systemd-notify: $message"
 done
 
+# run server for 10 seconds and see the messages logged
 sleep 10
 
 kill "$web_server_pid"
@@ -63,6 +71,9 @@ This is why its safe to run any command after `systemd-notify-fifo`.
 
 In some scenario, you might want to manually wait for the NOTIFY_SOCKET to be ready.
 In this case, you can use the `systemd-notify-fifo-server` command.
+
+The command accepts `-ready` argument, which is a path to a FIFO file that will be written to when the NOTIFY_SOCKET is ready.
+The `-out` argument is the same thing as the argument passed to `systemd-notify-fifo`.
 
 ```bash
 export NOTIFY_SOCKET=$(realpath ./notify.sock)
@@ -84,8 +95,7 @@ run_web_server &
 kill "$notify_pid"
 ```
 
-Don't forget to always wait for the NOTIFY_SOCKET to be ready,
-otherwise the behavior might be flaky.
+Don't forget to always wait for the NOTIFY_SOCKET to be ready, otherwise the behavior might be flaky.
 
 ```bash
 ready_fifo=$(mktemp -u)
