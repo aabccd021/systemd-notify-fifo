@@ -22,7 +22,8 @@ notify_pid=$(systemd-notify-fifo ./notify.pipe)
 # example web server that executes `systemd-notify --ready --no-block` when it's ready
 run_web_server &
 
-# read messages from the FIFO until we see "READY=1"
+# read messages from the FIFO until we see "READY=1",
+# which is sent by `systemd-notify --ready --no-block` command
 while true; do
  message=$(cat ./notify.pipe)
  if [ "$message" = "READY=1" ]; then
