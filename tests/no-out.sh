@@ -8,4 +8,4 @@ if [ "$exit_code" -ne 1 ]; then
 fi
 
 echo "Usage: server -out /path/to/pipe" >expected.txt
-diff --unified --color expected.txt actual.txt
+diff --unified --color=always expected.txt actual.txt
