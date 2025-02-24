@@ -19,7 +19,7 @@ export NOTIFY_SOCKET=$(realpath ./notify.sock)
 # this will forward every message sent to NOTIFY_SOCKET to ./notify.pipe
 notify_pid=$(systemd-notify-fifo ./notify.pipe)
 
-# this web server executed `systemd-notify --ready --no-block` when it's ready
+# example web server that executes `systemd-notify --ready --no-block` when it's ready
 run_web_server &
 
 # read messages from the FIFO until we see "READY=1"
