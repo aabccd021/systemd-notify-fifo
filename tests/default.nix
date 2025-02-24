@@ -24,4 +24,5 @@ in
 
   success = test "success" ./success.sh;
   no-out = test "no-out" ./no-out.sh;
+  relpath = test "relpath" ./relpath.sh;
 }
