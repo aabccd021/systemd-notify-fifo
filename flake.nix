@@ -39,6 +39,7 @@
       testAttrs = import ./tests {
         pkgs = pkgs;
         systemd-notify-fifo = systemd-notify-fifo;
+        systemd-notify-fifo-server = systemd-notify-fifo-server;
       };
 
       tests = pkgs.lib.mapAttrs' (name: value: { name = "test-" + name; value = value; }) testAttrs;

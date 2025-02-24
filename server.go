@@ -20,6 +20,7 @@ func write(path string, data []byte) error {
 }
 
 func main() {
+	log.SetFlags(0)
 	readyPath := flag.String("ready", "", "Path to the ready file")
 	outPath := flag.String("out", "", "Path to the pipe file")
 	flag.Parse()
