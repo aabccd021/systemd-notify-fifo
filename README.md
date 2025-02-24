@@ -19,10 +19,10 @@ run_web_server &
 
 # read messages from the FIFO until we see "READY=1"
 while true; do
-  message=$(cat ./notify.pipe)
-  if [ "$message" = "READY=1" ]; then
-    break
-  fi
+ message=$(cat ./notify.pipe)
+ if [ "$message" = "READY=1" ]; then
+  break
+ fi
 done
 
 echo "run_web_server is ready"
@@ -42,8 +42,8 @@ pid=$(systemd-notify-fifo ./notify.pipe)
 run_web_server &
 
 while true; do
-  message=$(cat ./notify.pipe)
-  echo "systemd-notify: $message"
+ message=$(cat ./notify.pipe)
+ echo "systemd-notify: $message"
 done
 
 kill "$pid"
@@ -64,7 +64,7 @@ ready_fifo=$(mktemp -u)
 mkfifo "$ready_fifo"
 
 # run the NOTIFY_SOCKET server in the background
-systemd-notify-fifo-server -ready "$ready_fifo"  -out ./notify.pipe &
+systemd-notify-fifo-server -ready "$ready_fifo" -out ./notify.pipe &
 pid=$!
 
 # wait for the NOTIFY_SOCKET to be ready
@@ -78,13 +78,13 @@ kill "$pid"
 ```
 
 Don't forget to always wait for the NOTIFY_SOCKET to be ready,
-otherwise the behavior of scripts using `systemd-notify-fifo` might be flaky.
+otherwise the behavior might be flaky.
 
 ```bash
 ready_fifo=$(mktemp -u)
 mkfifo "$ready_fifo"
 
-systemd-notify-fifo-server -ready "$ready_fifo"  -out ./notify.pipe &
+systemd-notify-fifo-server -ready "$ready_fifo" -out ./notify.pipe &
 pid=$!
 
 # This might result in flaky behavior, e.g. `systemd-notify` executed before NOTIFY_SOCKET is ready.
