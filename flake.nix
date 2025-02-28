@@ -4,10 +4,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    treefmt-nix = {
-      url = "github:numtide/treefmt-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    treefmt-nix.url = "github:numtide/treefmt-nix";
   };
 
   outputs = { self, nixpkgs, treefmt-nix }:
@@ -49,7 +46,6 @@
         settings.formatter.shellcheck.options = [ "-s" "sh" ];
         settings.global.excludes = [ "LICENSE" ];
       };
-
 
       testAttrs = import ./tests {
         pkgs = pkgs;
