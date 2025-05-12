@@ -5,7 +5,7 @@
   inputs.nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
   inputs.treefmt-nix.url = "github:numtide/treefmt-nix";
 
-  outputs = { self, nixpkgs, treefmt-nix }:
+  outputs = { self, ... }@inputs:
     let
 
       overlay = (final: prev:
@@ -26,15 +26,14 @@
         {
           systemd-notify-fifo-server = systemd-notify-fifo-server;
           systemd-notify-fifo = systemd-notify-fifo;
-
         });
 
-      pkgs = import nixpkgs {
+      pkgs = import inputs.nixpkgs {
         system = "x86_64-linux";
         overlays = [ overlay ];
       };
 
-      treefmtEval = treefmt-nix.lib.evalModule pkgs {
+      treefmtEval = inputs.treefmt-nix.lib.evalModule pkgs {
         projectRootFile = "flake.nix";
         programs.nixpkgs-fmt.enable = true;
         programs.prettier.enable = true;
@@ -75,6 +74,7 @@
         default = pkgs.systemd-notify-fifo;
       };
 
+      devShells.x86_64-linux = devShells;
       checks.x86_64-linux = packages;
       formatter.x86_64-linux = formatter;
       overlays.default = overlay;
