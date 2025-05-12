@@ -61,7 +61,7 @@
 
       tests = pkgs.lib.mapAttrs' (name: value: { name = "test-" + name; value = value; }) testAttrs;
 
-      packages = tests // {
+      packages = tests // devShells // {
         systemd-notify-fifo-server = pkgs.systemd-notify-fifo-server;
         systemd-notify-fifo = pkgs.systemd-notify-fifo;
         formatting = treefmtEval.config.build.check self;
@@ -69,7 +69,7 @@
 
     in
     {
-      packages.x86_64-linux = packages // devShells // {
+      packages.x86_64-linux = packages // {
         gcroot = pkgs.linkFarm "gcroot" packages;
         default = pkgs.systemd-notify-fifo;
       };
