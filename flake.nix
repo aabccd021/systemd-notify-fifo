@@ -2,10 +2,8 @@
 
   nixConfig.allow-import-from-derivation = false;
 
-  inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    treefmt-nix.url = "github:numtide/treefmt-nix";
-  };
+  inputs.nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+  inputs.treefmt-nix.url = "github:numtide/treefmt-nix";
 
   outputs = { self, nixpkgs, treefmt-nix }:
     let
@@ -47,10 +45,18 @@
         settings.global.excludes = [ "LICENSE" ];
       };
 
+      formatter = treefmtEval.config.build.wrapper;
+
       testAttrs = import ./tests {
         pkgs = pkgs;
         systemd-notify-fifo = pkgs.systemd-notify-fifo;
         systemd-notify-fifo-server = pkgs.systemd-notify-fifo-server;
+      };
+
+      devShells.default = pkgs.mkShellNoCC {
+        buildInputs = [
+          pkgs.nixd
+        ];
       };
 
       tests = pkgs.lib.mapAttrs' (name: value: { name = "test-" + name; value = value; }) testAttrs;
@@ -61,19 +67,15 @@
         formatting = treefmtEval.config.build.check self;
       };
 
-      gcroot = packages // {
+    in
+    {
+      packages.x86_64-linux = packages // devShells // {
         gcroot = pkgs.linkFarm "gcroot" packages;
         default = pkgs.systemd-notify-fifo;
       };
 
-    in
-    {
-      packages.x86_64-linux = gcroot;
-
-      checks.x86_64-linux = gcroot;
-
-      formatter.x86_64-linux = treefmtEval.config.build.wrapper;
-
+      checks.x86_64-linux = packages;
+      formatter.x86_64-linux = formatter;
       overlays.default = overlay;
     };
 }
