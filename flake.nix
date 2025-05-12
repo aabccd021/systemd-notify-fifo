@@ -65,6 +65,7 @@
         systemd-notify-fifo-server = pkgs.systemd-notify-fifo-server;
         systemd-notify-fifo = pkgs.systemd-notify-fifo;
         formatting = treefmtEval.config.build.check self;
+        formatter = formatter;
       };
 
     in
