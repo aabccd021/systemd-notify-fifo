@@ -1,6 +1,11 @@
-{ pkgs, systemd-notify-fifo, systemd-notify-fifo-server }:
+{
+  pkgs,
+  systemd-notify-fifo,
+  systemd-notify-fifo-server,
+}:
 let
-  test = name: scriptPath:
+  test =
+    name: scriptPath:
     let
       script = pkgs.writeShellApplication {
         name = "run";
