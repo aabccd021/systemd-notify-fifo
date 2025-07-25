@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"net"
 	"os"
@@ -26,7 +27,8 @@ func main() {
 	flag.Parse()
 
 	if *outPath == "" {
-		log.Fatal("Usage: server -out /path/to/pipe")
+		ppid := os.Getppid()
+		*outPath = fmt.Sprintf("/tmp/%d-systemd-notify-fifo.fifo", ppid)
 	}
 
 	notifySocket := os.Getenv("NOTIFY_SOCKET")
