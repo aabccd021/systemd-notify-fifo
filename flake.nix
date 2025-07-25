@@ -36,6 +36,18 @@
             text = builtins.readFile ./systemd_notify_fifo.sh;
           };
 
+          systemd-notify-fifo-wait-ready = final.writeShellApplication {
+            name = "systemd-notify-fifo-wait-ready";
+            text = ''
+              while true; do
+                result=$(cat "/tmp/$PPID-systemd-notify-fifo.fifo")
+                if [ "$result" = "READY=1" ]; then
+                  break
+                fi
+              done
+            '';
+          };
+
         in
         {
           systemd-notify-fifo = pkgs.symlinkJoin {
@@ -43,6 +55,7 @@
             paths = [
               systemd-notify-fifo-server
               systemd-notify-fifo
+              systemd-notify-fifo-wait-ready
             ];
           };
         }
