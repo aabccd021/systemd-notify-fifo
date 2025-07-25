@@ -1,7 +1,6 @@
 {
   pkgs,
   systemd-notify-fifo,
-  systemd-notify-fifo-server,
 }:
 let
   test =
@@ -11,7 +10,6 @@ let
         name = "run";
         runtimeInputs = [
           systemd-notify-fifo
-          systemd-notify-fifo-server
           pkgs.systemd
         ];
         text = builtins.readFile scriptPath;

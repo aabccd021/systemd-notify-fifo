@@ -38,8 +38,13 @@
 
         in
         {
-          systemd-notify-fifo-server = systemd-notify-fifo-server;
-          systemd-notify-fifo = systemd-notify-fifo;
+          systemd-notify-fifo = pkgs.symlinkJoin {
+            name = "systemd-notify-fifo";
+            paths = [
+              systemd-notify-fifo-server
+              systemd-notify-fifo
+            ];
+          };
         }
       );
 
@@ -67,7 +72,6 @@
       testAttrs = import ./tests {
         pkgs = pkgs;
         systemd-notify-fifo = pkgs.systemd-notify-fifo;
-        systemd-notify-fifo-server = pkgs.systemd-notify-fifo-server;
       };
 
       devShells.default = pkgs.mkShellNoCC {
@@ -85,7 +89,6 @@
         tests
         // devShells
         // {
-          systemd-notify-fifo-server = pkgs.systemd-notify-fifo-server;
           systemd-notify-fifo = pkgs.systemd-notify-fifo;
           formatting = treefmtEval.config.build.check self;
           formatter = formatter;
