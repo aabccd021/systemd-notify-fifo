@@ -1,7 +1,7 @@
 ready_fifo=$(mktemp -u)
 mkfifo "$ready_fifo"
 
-out_fifo="$1"
+out_fifo="${1:-}"
 if [ -z "$out_fifo" ]; then
   out_fifo="/tmp/$PPID-systemd-notify-fifo.fifo"
 fi
