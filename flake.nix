@@ -24,23 +24,32 @@
       overlay = (
         final: prev:
         let
-          systemd-notify-fifo-server = final.runCommandLocal "systemd-notify-fifo" { } ''
+          systemd-notify-server = final.runCommandLocal "systemd-notify-server" { } ''
             mkdir -p "$out/bin" 
             export XDG_CACHE_HOME="$PWD"
-            ${final.go}/bin/go build -o "$out/bin/systemd-notify-fifo-server" ${./server.go}
+            ${final.go}/bin/go build -o "$out/bin/systemd-notify-server" ${./server.go}
           '';
 
-          systemd-notify-fifo = final.writeShellApplication {
-            name = "systemd-notify-fifo";
-            runtimeInputs = [ systemd-notify-fifo-server ];
-            text = builtins.readFile ./systemd_notify_fifo.sh;
+          systemd-notify-server-prepare = final.writeShellApplication {
+            name = "systemd-notify-server-prepare";
+            text = ''
+              rm -f "/tmp/$PPID-systemd-notify.fifo" > /dev/null 2>&1 || true
+              mkfifo "/tmp/$PPID-systemd-notify-server.fifo"
+            '';
           };
 
-          systemd-notify-fifo-wait-ready = final.writeShellApplication {
-            name = "systemd-notify-fifo-wait-ready";
+          systemd-notify-server-wait = final.writeShellApplication {
+            name = "systemd-notify-server-wait";
+            text = ''
+              cat "/tmp/$PPID-systemd-notify-server.fifo"
+            '';
+          };
+
+          systemd-notify-wait = final.writeShellApplication {
+            name = "systemd-notify-wait";
             text = ''
               while true; do
-                result=$(cat "/tmp/$PPID-systemd-notify-fifo.fifo")
+                result=$(cat "/tmp/$PPID-systemd-notify.fifo")
                 if [ "$result" = "READY=1" ]; then
                   break
                 fi
@@ -53,9 +62,10 @@
           systemd-notify-fifo = pkgs.symlinkJoin {
             name = "systemd-notify-fifo";
             paths = [
-              systemd-notify-fifo-server
-              systemd-notify-fifo
-              systemd-notify-fifo-wait-ready
+              systemd-notify-server
+              systemd-notify-server-prepare
+              systemd-notify-server-wait
+              systemd-notify-wait
             ];
           };
         }
@@ -82,31 +92,18 @@
 
       formatter = treefmtEval.config.build.wrapper;
 
-      testAttrs = import ./tests {
-        pkgs = pkgs;
-        systemd-notify-fifo = pkgs.systemd-notify-fifo;
-      };
-
       devShells.default = pkgs.mkShellNoCC {
         buildInputs = [
           pkgs.nixd
         ];
       };
 
-      tests = pkgs.lib.mapAttrs' (name: value: {
-        name = "test-" + name;
-        value = value;
-      }) testAttrs;
-
-      packages =
-        tests
-        // devShells
-        // {
-          systemd-notify-fifo = pkgs.systemd-notify-fifo;
-          formatting = treefmtEval.config.build.check self;
-          formatter = formatter;
-          allInputs = collectInputs inputs;
-        };
+      packages = devShells // {
+        systemd-notify-fifo = pkgs.systemd-notify-fifo;
+        formatting = treefmtEval.config.build.check self;
+        formatter = formatter;
+        allInputs = collectInputs inputs;
+      };
 
     in
     {

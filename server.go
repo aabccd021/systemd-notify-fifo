@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"net"
@@ -22,21 +21,15 @@ func write(path string, data []byte) error {
 
 func main() {
 	log.SetFlags(0)
-	readyPath := flag.String("ready", "", "Path to the ready file")
-	outPath := flag.String("out", "", "Path to the pipe file")
-	flag.Parse()
-
-	if *outPath == "" {
-		ppid := os.Getppid()
-		*outPath = fmt.Sprintf("/tmp/%d-systemd-notify-fifo.fifo", ppid)
-	}
-
 	notifySocket := os.Getenv("NOTIFY_SOCKET")
 	if !filepath.IsAbs(notifySocket) {
 		log.Fatalf("NOTIFY_SOCKET must be an absolute path, otherwise systemd-notify will throw Protocol error")
 	}
 
-	err := syscall.Mkfifo(*outPath, 0666)
+	ppid := os.Getppid()
+
+	outPath := fmt.Sprintf("/tmp/%d-systemd-notify.fifo", ppid)
+	err := syscall.Mkfifo(outPath, 0666)
 	if err != nil {
 		log.Fatalf("Failed to create pipe: %v", err)
 	}
@@ -50,10 +43,9 @@ func main() {
 	}
 	defer conn.Close()
 
-	if *readyPath != "" {
-		if err := write(*readyPath, []byte{}); err != nil {
-			log.Fatalf("Ready path is not writable: %v", err)
-		}
+	readyPath := fmt.Sprintf("/tmp/%d-systemd-notify-server.fifo", ppid)
+	if err := write(readyPath, []byte{}); err != nil {
+		log.Fatalf("Ready path is not writable: %v", err)
 	}
 
 	buf := make([]byte, 65536)
@@ -64,7 +56,7 @@ func main() {
 			continue
 		}
 
-		if err := write(*outPath, buf[:n]); err != nil {
+		if err := write(outPath, buf[:n]); err != nil {
 			log.Fatalf("Error writing to pipe: %v", err)
 			continue
 		}
