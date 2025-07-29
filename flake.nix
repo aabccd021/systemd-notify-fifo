@@ -33,7 +33,7 @@
           systemd-notify-server-prepare = final.writeShellApplication {
             name = "systemd-notify-server-prepare";
             text = ''
-              rm -f "/tmp/$PPID-systemd-notify.fifo" > /dev/null 2>&1 || true
+              rm -f "/tmp/$PPID-systemd-notify-server.fifo" > /dev/null 2>&1 || true
               mkfifo "/tmp/$PPID-systemd-notify-server.fifo"
             '';
           };
