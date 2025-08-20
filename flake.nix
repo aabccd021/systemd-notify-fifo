@@ -24,7 +24,7 @@
       overlay = (
         final: prev:
         let
-          systemd-notify-server = final.runCommandLocal "systemd-notify-server" { } ''
+          systemd-notify-server = final.runCommand "systemd-notify-server" { } ''
             mkdir -p "$out/bin" 
             export XDG_CACHE_HOME="$PWD"
             ${final.go}/bin/go build -o "$out/bin/systemd-notify-server" ${./server.go}
@@ -92,6 +92,19 @@
 
       formatter = treefmtEval.config.build.wrapper;
 
+      test =
+        pkgs.runCommand "test"
+          {
+            buildInputs = [
+              pkgs.systemd-notify-fifo
+              pkgs.systemd
+            ];
+          }
+          ''
+            timeout 5 bash ${./test.sh}
+            touch $out
+          '';
+
       devShells.default = pkgs.mkShellNoCC {
         buildInputs = [
           pkgs.nixd
@@ -99,6 +112,7 @@
       };
 
       packages = devShells // {
+        test = test;
         systemd-notify-fifo = pkgs.systemd-notify-fifo;
         formatting = treefmtEval.config.build.check self;
         formatter = formatter;
