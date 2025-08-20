@@ -1,5 +1,25 @@
 # systemd-notify-fifo
 
+## TODO
+
+make it all single executable binary
+
+```sh
+# before
+systemd-notify-server-prepare
+systemd-notify-server &
+systemd-notify-server-wait
+systemd-notify-wait
+
+# after
+systemd-notify-fifo server prepare
+systemd-notify-fifo server start
+systemd-notify-fifo server wait-ready
+systemd-notify-fifo client wait-ready
+```
+
+## Getting started
+
 Pipe systemd-notify messages to Unix FIFO.
 
 You can use this to mock systemd-notify, log notified messages, or wait for a server to be ready.
