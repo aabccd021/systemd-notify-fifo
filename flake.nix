@@ -24,11 +24,19 @@
       overlay = (
         final: prev:
         let
-          systemd-notify-server = final.runCommand "systemd-notify-server" { } ''
-            mkdir -p "$out/bin" 
-            export XDG_CACHE_HOME="$PWD"
-            ${final.go}/bin/go build -o "$out/bin/systemd-notify-server" ${./server.go}
-          '';
+          systemd-notify-server =
+            final.runCommand "systemd-notify-server"
+              {
+                buildInputs = [
+                  final.go
+                  final.gcc
+                ];
+              }
+              ''
+                mkdir -p "$out/bin" 
+                export XDG_CACHE_HOME="$PWD"
+                go build -o "$out/bin/systemd-notify-server" ${./server.go}
+              '';
 
           systemd-notify-server-prepare = final.writeShellApplication {
             name = "systemd-notify-server-prepare";
